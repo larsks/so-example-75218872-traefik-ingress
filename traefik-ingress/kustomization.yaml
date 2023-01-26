@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: traefik-ingress
+
+commonLabels:
+  app.kubernetes.io/name: traefik
+  app.kubernetes.io/managed-by: kustomize
+
+resources:
+  - namespace.yaml
+  - traefik.yaml
+
+configMapGenerator:
+  - name: traefik-env
+    literals:
+      - TRAEFIK_API=true
+      - TRAEFIK_API_DASHBOARD=true
+      - TRAEFIK_API_INSECURE=true
+
+patches:
+  - target:
+      kind: Service
+      name: traefik
+    patch: |
+      - op: add
+        path: /spec/type
+        value: NodePort
+      - op: add
+        path: /spec/ports/0/nodePort
+        value: 30080
+      - op: add
+        path: /spec/ports/1/nodePort
+        value: 30443
+# - patch: |
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     metadata:
+#       name: traefik
+#       namespace: traefik-ingress
+#     spec:
+#       template:
+#         spec:
+#           containers:
+#           - name: traefik
+#             envFrom:
+#               - configMapRef:
+#                   name: traefik-env

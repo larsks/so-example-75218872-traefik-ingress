@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`api.my-domain.com`)
+      kind: Rule
+      priority: 1000
+      services:
+        - name: old-api
+          port: 80
